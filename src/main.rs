@@ -15,8 +15,12 @@ fn main() {
     for stream in listener.incoming() {
         let stream = stream.unwrap();
 
-        pool.execute(|| handle_connection(stream));
+        pool.execute(|| {
+            handle_connection(stream);
+        });
     }
+
+    println!("Shutting down.");
 }
 
 fn handle_connection(mut stream: TcpStream) {
@@ -36,5 +40,7 @@ fn handle_connection(mut stream: TcpStream) {
     let length = content.len();
 
     let response = format!("{status}\r\nContent-Length: {length}\r\n\r\n{content}");
+
     stream.write_all(response.as_bytes()).unwrap();
+    stream.flush().unwrap();
 }
